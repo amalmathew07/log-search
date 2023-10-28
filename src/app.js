@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require('cors');
+const { getMatchedLogs } = require("./matchLogExtractor");
+
 const app = express();
 const port = 3000;
 app.use(cors());
@@ -15,7 +17,8 @@ app.get("/logs", (req, res) => {
     });
   }
 
-  res.status(200).send("Testing Server");
+  getMatchedLogs(pattern,count, fileName, res);
+
 });
 
 app.listen(port, () => {
