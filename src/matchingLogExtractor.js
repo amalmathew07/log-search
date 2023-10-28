@@ -1,125 +1,190 @@
 const fs = require("fs");
 const path = require("path");
 
-const getMatchedLogs = (pattern, count, fileName, res) => {
-  const logsDir = path.join(__dirname, "var", "logs");
+const logsDir = path.join(__dirname, "var", "logs");
+let incompleteLastLine, incompleteFirstLine;
 
-  const matchedLogs = [];
-  let shouldStopReading = false; // variable to check if we should continue reading - once count is found, we can skip rest of the file
+// Entry method for the logic
+const getMatchedLogs = async (pattern, count, fileName, res) => {
 
+  let shouldStopReading = false; // variable to determine when to stop reading - set to true once the count is reached
+  let matchedLogs = []; // variable to store the matched logs
+  incompleteLastLine = ""; // variable to store the incomplete last line
+  incompleteFirstLine = "";
+  return await processLogFile(
+    pattern,
+    count,
+    fileName,
+    res,
+    matchedLogs,
+    shouldStopReading
+  );
+};
+
+// Method to process the chunk
+const processStream = (
+  start,
+  end,
+  pattern,
+  count,
+  res,
+  matchedLogs,
+  filePath,
+  bufferSize
+) => {
+  return new Promise((resolve, reject) => {
+    
+    // Create a read stream for the chunk
+    // initial will be from start - bufferSize till the fileSize
+    // for the next iterations, start and end pointers will be modified
+    const readStream = fs.createReadStream(filePath, {
+      start,
+      end,
+      highWaterMark: bufferSize,
+      encoding: "utf-8",
+    });
+
+    let data = "";
+
+    // Read the chunk and once the matchLogs count
+    // is satisfied, destroy the readStream and exit
+    readStream.on("data", (chunk) => {
+      if (count == matchedLogs.length) {
+        readStream.destroy();
+        return true;
+      } else {
+        data += chunk;
+      }
+    });
+
+    // This is called once a readStream is finished
+    // If the readStream is destroyed, this won't get called
+    readStream.on("end", () => {
+      // Since we are reading in chunks, the first and last lines could be incomplete or not in proper format
+      // In each iteration, we concat the current chunk with the previous value of incomplete line.
+      // By doing so, that particular line will be complete for the next iteration
+      const lines = (incompleteLastLine + data + incompleteFirstLine).split("\n");
+
+      // Only take incomplete lines if it's not valid
+      incompleteFirstLine = validateIncompleteLine(incompleteFirstLine, lines, true);
+      incompleteLastLine = validateIncompleteLine(
+        incompleteLastLine,
+        lines,
+        false
+      );
+
+      // Process the lines of each chunk
+      const shouldStopReading = processLines(
+        pattern,
+        count,
+        lines,
+        res,
+        matchedLogs
+      );
+
+      // If we got the required result, we can exit by returning the matchLogs in the 
+      // caller function
+      if (shouldStopReading) {
+        readStream.destroy();
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    });
+
+    readStream.on("error", (error) => {
+      console.log(error);
+      res.status(500).send({ Error: "Internal Server Error" });
+      reject(error);
+    });
+  });
+}
+
+// Method to check if the incomplete line is valid or not
+// This method will get called only once per chunk at maximum
+const validateIncompleteLine = (incompleteLine, lines, isStart) => {
+  try {
+    // Here we check if the incomplete line (first or last)
+    // is valid
+    let resultLine = "";
+    resultLine = isStart ? lines[0] : lines[lines.length - 1];
+    if (resultLine) {
+      JSON.parse(resultLine);
+      return "";
+    } else {
+      return "";
+    }
+  } catch (err) {
+    // if the line is incomplete return and set incompleteLine 
+    // as the first or last accordingly
+    incompleteLine = isStart ? lines.shift() : lines.pop();
+    return incompleteLine;
+  }
+}
+
+
+const processLines = (pattern, count, lines, res, matchedLogs) => {
+
+  // Loop through the lines of current chunk (128KB) from the last
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i];
+    try {
+      if (line.toLowerCase().includes(pattern.toLowerCase())) {
+        const json = JSON.parse(line);
+        matchedLogs.push(json);
+        if (matchedLogs.length === count) {
+          // If pattern and count matches return the flag
+          // to notify no more chunk processing required
+          return true;
+        }
+      }
+    } catch (error) {
+      //Incomplete line, continue and will be taken care in the next iteration
+    }
+  }}
+
+const processLogFile = async (
+  pattern,
+  count,
+  fileName,
+  res,
+  matchedLogs,
+  shouldStopReading
+) => {
   try {
     const filePath = path.join(logsDir, fileName);
     const fileSize = fs.statSync(filePath).size;
 
-    // Initializing end pointer for readStream to fileSize, so that we can start reading from the end
-    let end = fileSize;
     // Reading in chunks for efficiency and if file size is less than 128KB, we can directly load the whole file, else split into chunks of 128KB
     const bufferSize = Math.min(fileSize, 128 * 1024);
-    let incompleteLine = "";
-    let incompleteLastLine = "";
 
-    // Looping through till the end of the file or till the match is found
+    // Initializing end pointer to filze size so we read the last chunk first
+    let end = fileSize;
+
+    // Continue reading until end of the file reached or if the desired count is reached
     while (end > 0 && !shouldStopReading) {
-      // After each iteration, reset start to consider the next chunk (or the next 128 KB)
-      let start = Math.max(0, end - bufferSize);
 
-      // Create readStream with the specified start and end so that we read from the end od the file
-      const readStream = fs.createReadStream(filePath, {
+      // Initialize the start to end - buffer size, so that the last chunk is processed first
+      const start = Math.max(0, end - bufferSize);
+
+      shouldStopReading = await processStream(
         start,
         end,
-        highWaterMark: bufferSize,
-        encoding: "utf-8",
-      });
-      readStream.on("readable", () => {
-        let chunk;
+        pattern,
+        count,
+        res,
+        matchedLogs,
+        filePath,
+        bufferSize
+      );
 
-        // If there are more chunks to read or if matches not found or if next files cannot be skipped,
-        // get into the loop to do the execution line by line
-        while ((chunk = readStream.read()) !== null && !shouldStopReading) {
-          // Since we are reading in chunks, the first and last lines could be incomplete or not in proper format
-          // In each iteration, we concat the current chunk with the previous value of incomplete line.
-          // By doing so, that particular line will be complete for the next iteration
-          const lines = (incompleteLastLine + chunk + incompleteLine).split("\n");
-
-          // Now take incomplete line on the current chunk (which will be concatenated with the next chunk in next iteration)
-          incompleteLine = validateIncompleteLine(incompleteLine, lines, true);
-          incompleteLastLine = validateIncompleteLine(incompleteLastLine, lines, false);
-
-          // Loop through the lines of current chunk (128KB) from the last
-          for (let i = lines.length - 1; i >= 0; i--) {
-            const line = lines[i];
-            try {
-              if (line.toLowerCase().includes(pattern.toLowerCase())) {
-                const json = JSON.parse(line);
-                matchedLogs.push(json);
-                if (matchedLogs.length === count) {
-                  // If pattern and count matches, send the response and also set the corresponding flags
-                  // to skip further iterations of the chunk and files
-                  shouldStopReading = true;
-                  sendResponse(res, matchedLogs);
-                  // destroy the readstream so that rest of the current chunk is not processed
-                  readStream.destroy();
-                  break;
-                }
-              }
-            } catch (error) {
-              console.log("Here");
-              //Incomplete line, continue and will be taken care in the next iteration
-            }
-          }
-        }
-        readStream.destroy();
-      });
-
-      // This is called once a readStream is finished
-      // If the readStream is destroyed, this won't get called
-      readStream.on("end", () => {
-        if (!shouldStopReading) {
-          // In the readable case, we always checked the chunks by skipping
-          // the first line of the chunk. So the first line of the file will not be processed there
-          // Here we process the last incomplete line (or the first line of the file)
-          // If match and count was already found, this part of the code won't execute as
-          // shouldStopReading will be true
-          if (incompleteLine.toLowerCase().includes(pattern.toLowerCase())) {
-            const json = JSON.parse(incompleteLine);
-            matchedLogs.push(json);
-            if (matchedLogs.length === count) {
-              sendResponse(res, matchedLogs);
-              shouldStopReading = true;
-            }
-          } else {
-            sendResponse(res, matchedLogs);
-          }
-        }
-      });
-
-      readStream.on("error", () => {
-        res.status(500).send({ Error: "Internal Server Error" });
-      });
-
-      // After each iteration, assign end to start so that we can process the next chunk
-      // which ends where the previous chunk was started.
-      // eg: lets say FileSize = 500, Iteration 1: end: 500 and start: 500-128 = 372
-      // Iteration 2: end = 372 and start = 372-128 = 244 and so on till it reaches the end of file
+      // Once a chunk is done processing, reinitialize end to start
       end = start;
     }
+    return matchedLogs;
   } catch (error) {
-    res.status(500).send({ Error: "Unable to fetch, please try again" });
+    res.status(400).send("Error processing the files given");
   }
-};
-
-function validateIncompleteLine(incompleteLine, lines, isStart) {
-  try {
-    JSON.parse(incompleteLine);
-    incompleteLine = '';
-  } catch (err) {
-    isStart ? incompleteLine = lines.shift() : lines.pop();
-  }
-  return incompleteLine;
-}
-
-function sendResponse(res, matchedLogs) {
-  res.json(matchedLogs);
 }
 
 module.exports = { getMatchedLogs };
