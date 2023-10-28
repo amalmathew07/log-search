@@ -14,46 +14,51 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
 
       let end = fileSize;
       const bufferSize = Math.min(fileSize, 128 * 1024);
-      let start = Math.max(0, end - bufferSize);
 
-      const readStream = fs.createReadStream(filePath, {
-        start,
-        end,
-        highWaterMark: bufferSize,
-        encoding: "utf-8",
-      });
+      while (end > 0) {
+        let start = Math.max(0, end - bufferSize);
 
-      readStream.on("readable", () => {
-        let chunk;
+        const readStream = fs.createReadStream(filePath, {
+          start,
+          end,
+          highWaterMark: bufferSize,
+          encoding: "utf-8",
+        });
 
-        while ((chunk = readStream.read()) !== null) {
-          const lines = chunk.split("\n");
+        readStream.on("readable", () => {
+          let chunk;
 
-          for (let i = lines.length - 1; i >= 0; i--) {
-            const line = lines[i];
-            try {
-              if (line.toLowerCase().includes(pattern.toLowerCase())) {
-                const json = JSON.parse(line);
-                matchedLogs.push(json);
-                if (matchedLogs.length === count) {
-                  sendResponse(res, matchedLogs);
-                  readStream.destroy();
-                  break;
+          while ((chunk = readStream.read()) !== null) {
+            const lines = chunk.split("\n");
+
+            for (let i = lines.length - 1; i >= 0; i--) {
+              const line = lines[i];
+              try {
+                if (line.toLowerCase().includes(pattern.toLowerCase())) {
+                  const json = JSON.parse(line);
+                  matchedLogs.push(json);
+                  if (matchedLogs.length === count) {
+                    sendResponse(res, matchedLogs);
+                    readStream.destroy();
+                    break;
+                  }
                 }
+              } catch (error) {
+                console.log("Here");
               }
-            } catch (error) {
-              console.log("Here");
             }
           }
-        }
-        readStream.destroy();
-      });
+          readStream.destroy();
+        });
 
-      readStream.on("end", () => {});
+        readStream.on("end", () => {});
 
-      readStream.on("error", (error) => {
-        res.status(500).send({ Error: "Internal Server Error" });
-      });
+        readStream.on("error", (error) => {
+          res.status(500).send({ Error: "Internal Server Error" });
+        });
+
+        end = start;
+      }
     } catch (error) {
       res.status(500).send({ Error: "Unable to fetch, please try again" });
     }
