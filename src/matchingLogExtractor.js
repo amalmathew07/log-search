@@ -7,6 +7,8 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
   const files = fileName ? [fileName] : fs.readdirSync(logsDir);
 
   const matchedLogs = [];
+  let shouldStopReading = false;
+  let fileCount = 0;
   for (const file of files) {
     try {
       const filePath = path.join(logsDir, file);
@@ -15,7 +17,7 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
       let end = fileSize;
       const bufferSize = Math.min(fileSize, 128 * 1024);
 
-      while (end > 0) {
+      while (end > 0 && !shouldStopReading) {
         let start = Math.max(0, end - bufferSize);
 
         const readStream = fs.createReadStream(filePath, {
@@ -28,7 +30,7 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
         readStream.on("readable", () => {
           let chunk;
 
-          while ((chunk = readStream.read()) !== null) {
+          while ((chunk = readStream.read()) !== null && !shouldStopReading) {
             const lines = chunk.split("\n");
 
             for (let i = lines.length - 1; i >= 0; i--) {
@@ -40,6 +42,7 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
                   if (matchedLogs.length === count) {
                     sendResponse(res, matchedLogs);
                     readStream.destroy();
+                    shouldStopReading = true;
                     break;
                   }
                 }
@@ -51,7 +54,12 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
           readStream.destroy();
         });
 
-        readStream.on("end", () => {});
+        readStream.on("end", () => {
+          fileCount++;
+          if (fileCount == files.length && !shouldStopReading) {
+            sendResponse(res, matchedLogs);
+          }
+        });
 
         readStream.on("error", (error) => {
           res.status(500).send({ Error: "Internal Server Error" });
