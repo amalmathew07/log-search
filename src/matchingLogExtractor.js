@@ -16,6 +16,7 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
 
       let end = fileSize;
       const bufferSize = Math.min(fileSize, 128 * 1024);
+      let incompleteLine = "";
 
       while (end > 0 && !shouldStopReading) {
         let start = Math.max(0, end - bufferSize);
@@ -31,7 +32,8 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
           let chunk;
 
           while ((chunk = readStream.read()) !== null && !shouldStopReading) {
-            const lines = chunk.split("\n");
+            const lines = (chunk + incompleteLine).split("\n");
+            incompleteLine = lines.shift();
 
             for (let i = lines.length - 1; i >= 0; i--) {
               const line = lines[i];
@@ -55,11 +57,20 @@ const getMatchedLogs = (pattern, count, fileName, res) => {
         });
 
         readStream.on("end", () => {
-          fileCount++;
-          if (fileCount == files.length && !shouldStopReading) {
-            sendResponse(res, matchedLogs);
-          }
-        });
+            fileCount++;
+            if (fileCount == files.length && !shouldStopReading) {
+              if (incompleteLine.toLowerCase().includes(pattern.toLowerCase())) {
+                const json = JSON.parse(incompleteLine);
+                matchedLogs.push(json);
+                if (matchedLogs.length === count) {
+                  sendResponse(res, matchedLogs);
+                  shouldStopReading = true;
+                }
+              } else {
+                sendResponse(res, matchedLogs);
+              }
+            }
+          });
 
         readStream.on("error", (error) => {
           res.status(500).send({ Error: "Internal Server Error" });
