@@ -34,6 +34,17 @@ const LogSearchUI = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+
+      if (!pattern.trim() || !fileName.trim()) {
+        toast.error("Pattern and file name cannot be blank.");
+        return;
+      }
+
+      if (!count.trim() || parseInt(count) <= 0) {
+        toast.error("Count should not be blank and should be greater than 0.");
+        return;
+      }
+
       const queryParams = new URLSearchParams({
         pattern,
         count,
@@ -43,7 +54,7 @@ const LogSearchUI = () => {
       const apiUrl = `http://localhost:3000/logs?${queryParams}`;
 
       const response = await fetch(apiUrl, {
-        method: "GET", 
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
@@ -176,7 +187,9 @@ const LogSearchUI = () => {
                   <td>{log.userId}</td>
                   <td>{convertDateToWords(log.timestamp)}</td>
                   <td>{log.message}</td>
-                  <td>{highlightPattern(JSON.stringify(log), currentPattern)}</td>
+                  <td>
+                    {highlightPattern(JSON.stringify(log), currentPattern)}
+                  </td>
                 </tr>
               ))}
             </tbody>

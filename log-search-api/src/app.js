@@ -10,10 +10,10 @@ app.get("/logs", async (req, res) => {
   const count = parseInt(req.query.count, 10);
   const fileName = req.query.fileName;
 
-  if (!pattern || isNaN(count) ||!fileName) {
+  if (!pattern || isNaN(count) || count <= 0 ||!fileName) {
     return res.status(400).json({
       error:
-        "Invalid parameters. Please provide fileName, pattern and count as query parameters.",
+        "Invalid parameters. Please provide fileName, pattern and count (should be greater than 0) as query parameters.",
     });
   }
   const logs = await getMatchedLogs(pattern,count, fileName, res);
