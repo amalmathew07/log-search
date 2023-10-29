@@ -185,3 +185,13 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  .container {
+    text-align: center;
+  }
+  
+  h1 {
+    color: #14537d;
+    padding-bottom: 100px;
+    border-bottom: 1px
+  }

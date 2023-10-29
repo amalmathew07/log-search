@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const logsDir = path.join(process.env.HOME, "var", "logs");
+const logsDir = path.join(process.env.HOME, "var", "log");
 let incompleteLastLine, incompleteFirstLine;
 
 // Entry method for the logic
@@ -184,7 +184,14 @@ const processLogFile = async (
     }
     return matchedLogs;
   } catch (error) {
-    res.status(400).send("Error processing the files given");
+    if (
+      error.code === "ENOENT" &&
+      error.message.includes("no such file or directory")
+    ) {
+      res.status(404).send({ error: "File not found at " + error.path, code: "FILE_NOT_FOUND", filePath : error.path });
+    } else {
+      res.status(400).send({ error: "Error processing the files given" });
+    }
   }
 };
 

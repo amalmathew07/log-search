@@ -61,14 +61,19 @@ const LogSearchUI = () => {
       });
 
       const data = await response.json();
-      if (data && data.length > 0) {
+      if (data && !data.error && data.length > 0) {
         setCurrentPage(0);
         toast.success("Data found successfully!");
+      } else if (data.error && data.code === "FILE_NOT_FOUND") {
+        setLogs([]);
+        toast.error(<div>Cannot find file <em><strong>${data.filePath}</strong></em>. Please try again.</div>);
       } else {
+        setLogs([]);
         toast.error("Data not found for the given criteria.");
       }
       setLogs(data);
     } catch (error) {
+      setLogs([]);
       toast.error("Error fetching data. Please try again.");
     } finally {
       setCurrentPattern(pattern);
@@ -93,6 +98,12 @@ const LogSearchUI = () => {
 
   const handleNextPage = () => {
     setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      fetchData();
+    }
   };
 
   const totalPages = Math.ceil(logs.length / rowsPerPage);
@@ -122,19 +133,19 @@ const LogSearchUI = () => {
     );
   };
 
-  console.log("Patter", pattern);
   return (
     <div className="container mt-5 p-4 border rounded">
-      <h1 className="mb-4">Log Search</h1>
+      <h1 className="mb-4">Log Search application</h1>
       <Form className="mb-4">
         <div className="custom-grp">
           <Form.Group className="mb-3">
-            <Form.Label>Pattern:</Form.Label>
+            <Form.Label>Search text/keyword:</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Enter pattern"
+              placeholder="Enter Text/Keyword"
               value={pattern}
               onChange={(e) => setPattern(e.target.value)}
+              onKeyDown={handleKeyPress}
               className="pattern-input"
             />
             <Form.Label>Number of Matches:</Form.Label>
@@ -143,6 +154,7 @@ const LogSearchUI = () => {
               placeholder="Enter count"
               value={count}
               onChange={(e) => setCount(e.target.value)}
+              onKeyDown={handleKeyPress}
             />
             <Form.Label>File Name:</Form.Label>
             <Form.Control
@@ -150,6 +162,7 @@ const LogSearchUI = () => {
               placeholder="Enter file name"
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
+              onKeyDown={handleKeyPress}
               className="filename-input"
             />
           </Form.Group>
@@ -160,7 +173,7 @@ const LogSearchUI = () => {
           className="custom-btn"
           size="lg"
         >
-          Search
+          Search Logs
         </Button>
       </Form>
 
@@ -176,9 +189,9 @@ const LogSearchUI = () => {
             <thead>
               <tr>
                 <th>User ID</th>
-                <th>Date logged:</th>
+                <th>Date logged</th>
                 <th>Message</th>
-                <th>Log</th>
+                <th>Log Entry</th>
               </tr>
             </thead>
             <tbody>
@@ -217,7 +230,7 @@ const LogSearchUI = () => {
           </Button>
         )}
       </div>
-      <ToastContainer />
+      <ToastContainer autoClose={5000} />
     </div>
   );
 };

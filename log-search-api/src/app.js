@@ -17,7 +17,7 @@ app.get("/logs", async (req, res) => {
     });
   }
   const logs = await getMatchedLogs(pattern, count, fileName, res);
-  res.status(200).send(logs);
+  logs && logs.length > 0 ? res.status(200).send(logs) : res.status(404).send({ error: "No data found for the given criteria" });
 });
 
 app.listen(port, () => {
