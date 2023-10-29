@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import LogSearch from './LogSearch';
 
 const App = () => {
   return (
     <div>
-      TEST
+      <LogSearch />
     </div>
   );
 };

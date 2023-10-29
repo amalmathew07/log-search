@@ -1,0 +1,155 @@
+/* style.css */
+
+.container {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-weight: bold;
+  color: #343a40;
+  padding-right: 10px;
+}
+
+.form-control {
+  width: 7%;
+  padding: 10px;
+  margin-right: 100px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+/* Adjusted styles for horizontal alignment */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-row .form-group {
+  margin-right: 20px;
+}
+
+/* Added style to reduce width of the Number of Matches input */
+.form-row .form-group.number-input {
+  width: 30%;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.table {
+  border: 1px solid #1dbee6;
+  margin-left: 30px;
+  margin-top: 20px;
+  border-collapse: collapse;
+  width: 90%;
+}
+
+.table th,
+.table td {
+  padding: 15px;
+  text-align: left;
+  border: 1px solid #1dbee6;
+  min-width: 130px;
+}
+.table th:nth-child(3),
+.table td:nth-child(3),
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  min-width: 200px; 
+}
+
+.table td {
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 1000px;
+}
+
+.table th {
+  background-color: #1dbee6;
+  font-weight: bold;
+  color: #333;
+}
+
+.custom-btn {
+  background-color: #1dbee6; /* Red color */
+  border-color: #1dbee6;
+  color: #0c191d; /* Text color */
+  font-size: 18px; /* Increase font size */
+  padding: 10px 20px; /* Adjust padding for a larger button */
+  display: block;
+  margin: 50px auto; /* Center the button */
+}
+
+.custom-btn:hover {
+  background-color: #09495e; /* Darker red on hover */
+  border-color: #09495e;
+  color: #aab2b5;
+}
+
+.custom-grp {
+  margin-left: 150px;
+}
+
+.pattern-input {
+  width: 20%;
+}
+
+.filename-input {
+  width: 15%;
+}
+
+.table-responsive {
+  max-height: 70vh; /* Adjust the percentage as needed */
+  overflow-y: auto;
+}
+
+.table-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+    cursor: pointer;
+    margin: 0 5px;
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+  
+  .pagination button:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+  
+  .pagination button.active {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
