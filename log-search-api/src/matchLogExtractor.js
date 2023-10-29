@@ -10,7 +10,8 @@ const getMatchedLogs = async (pattern, count, fileName, res) => {
   let shouldStopReading = false; // variable to determine when to stop reading - set to true once the count is reached
   let matchedLogs = []; // variable to store the matched logs
   incompleteLastLine = ""; // variable to store the incomplete last line
-  incompleteFirstLine = "";
+  incompleteFirstLine = ""; // variable to store incomplete first line
+
   return await processLogFile(
     pattern,
     count,
