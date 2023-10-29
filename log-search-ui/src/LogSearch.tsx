@@ -40,7 +40,7 @@ const LogSearchUI = () => {
         return;
       }
 
-      if (!count.trim() || parseInt(count) <= 0) {
+      if (count.trim() === "" || parseInt(count) <= 0) {
         toast.error("Count should not be blank and should be greater than 0.");
         return;
       }
