@@ -1,0 +1,14 @@
+{
+  "name": "log-search",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1", 
+    "start-api": "npm run start --prefix ./log-search-api",
+    "start-ui": "npm run start --prefix ./log-search-ui",
+    "start" : "npm run start-api & npm run start-ui"
+  },
+  "author": "",
+  "license": "ISC"
+}

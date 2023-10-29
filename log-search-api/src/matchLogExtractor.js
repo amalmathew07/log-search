@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const logsDir = path.join(__dirname, "var", "logs");
+const logsDir = path.join(process.env.HOME, "var", "logs");
 let incompleteLastLine, incompleteFirstLine;
 
 
