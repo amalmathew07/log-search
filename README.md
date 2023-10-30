@@ -19,7 +19,7 @@ Once the inital setup of installing npm packages are done for both front end and
 ```http://localhost:3000``` and UI application on ```http://localhost:9000```. Please note that this will only work once **the npm packages are installed using ```npm install``` by navigating into respective folders**
 
 ## Testing the application
-The application can be tested in two ways using the front end app as described above or API clients like POSTMAN: 
+The application can be tested in two ways using the front end app as described above or API clients like POSTMAN (also there is a test log file in the ```/var/log``` folder in the ```log-search-api``` folder): 
 
 ### Using the front end application
 This is the most user friendly and preferred way to test the log search capability. 
