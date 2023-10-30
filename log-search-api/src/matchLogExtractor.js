@@ -146,6 +146,18 @@ const processLines = (pattern, count, lines, matchedLogs) => {
   }
 };
 
+const getFileSize = (filePath) => {
+  return new Promise((resolve, reject) => {
+    fs.stat(filePath, (err, stats) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stats.size);
+      }
+    });
+  });
+};
+
 const processLogFile = async (
   pattern,
   count,
@@ -156,7 +168,8 @@ const processLogFile = async (
 ) => {
   try {
     const filePath = path.join(logsDir, fileName);
-    const fileSize = fs.statSync(filePath).size;
+
+    const fileSize = await getFileSize(filePath);
 
     // Reading in chunks for efficiency and if file size is less than 128KB, we can directly load the whole file, else split into chunks of 128KB
     const bufferSize = Math.min(fileSize, 128 * 1024);
