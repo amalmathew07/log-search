@@ -38,3 +38,6 @@ This is the most user friendly and preferred way to test the log search capabili
 ## Testing Demos
 UI App Demo - https://monosnap.com/file/QMw2BMF6E1XikClfExOh8YnEsBqmj2
 Postman Test Demo - https://monosnap.com/file/danTMNVUn34xePVvFT6Sr1x3iltPS5
+
+## Documentation
+Technical design document: https://docs.google.com/document/d/1IbLD6d413uOOLUweF1IOhVChW9sdG1kTV_jVIWt5NUA/edit

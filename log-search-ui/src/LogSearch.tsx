@@ -67,7 +67,15 @@ const LogSearchUI = () => {
       } else if (data.error && data.code === "FILE_NOT_FOUND") {
         setLogs([]);
         setCurrentPage(0);
-        toast.error(<div>Cannot find file <em><strong>${data.filePath}</strong></em>. Please try again.</div>);
+        toast.error(
+          <div>
+            Cannot find file{" "}
+            <em>
+              <strong>${data.filePath}</strong>
+            </em>
+            . Please try again.
+          </div>
+        );
       } else {
         setLogs([]);
         setCurrentPage(0);
@@ -135,6 +143,57 @@ const LogSearchUI = () => {
       )
     );
   };
+  const getAvailableColumns = () => {
+    const allColumns = ["User ID", "Date logged", "Message", "Log Entry"];
+    const availableColumns = allColumns.filter((column) => {
+      if (column === "User ID" && !logs.some((log) => log.userId)) {
+        return false;
+      }
+      if (column === "Date logged" && !logs.some((log) => log.timestamp)) {
+        return false;
+      }
+      if (column === "Message" && !logs.some((log) => log.message)) {
+        return false;
+      }
+      return true;
+    });
+    return availableColumns;
+  };
+
+  const renderTableHeader = () => {
+    const headerColumns = getAvailableColumns();
+    return (
+      <thead>
+        <tr>
+          {headerColumns.map((column) => (
+            <th key={column}>{column}</th>
+          ))}
+        </tr>
+      </thead>
+    );
+  };
+
+  const renderTableBody = () => {
+    const headerColumns = getAvailableColumns();
+    return (
+      <tbody>
+        {currentLogs.map((log, index) => (
+          <tr key={index}>
+            {headerColumns.includes("User ID") && (
+              <td>{log.userId ? log.userId : ""}</td>
+            )}
+            {headerColumns.includes("Date logged") && (
+              <td>{log.timestamp ? convertDateToWords(log.timestamp) : ""}</td>
+            )}
+            {headerColumns.includes("Message") && (
+              <td>{log.message ? log.message : ""}</td>
+            )}
+            <td>{highlightPattern(JSON.stringify(log), currentPattern)}</td>
+          </tr>
+        ))}
+      </tbody>
+    );
+  };
 
   return (
     <div className="container mt-5 p-4 border rounded">
@@ -189,26 +248,8 @@ const LogSearchUI = () => {
       {logs.length > 0 && (
         <div className="table-responsive">
           <Table className="mt-4" striped bordered hover>
-            <thead>
-              <tr>
-                <th>User ID</th>
-                <th>Date logged</th>
-                <th>Message</th>
-                <th>Log Entry</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentLogs.map((log, index) => (
-                <tr key={index}>
-                  <td>{log.userId}</td>
-                  <td>{convertDateToWords(log.timestamp)}</td>
-                  <td>{log.message}</td>
-                  <td>
-                    {highlightPattern(JSON.stringify(log), currentPattern)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            {renderTableHeader()}
+            {renderTableBody()}
           </Table>
         </div>
       )}
