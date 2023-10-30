@@ -167,7 +167,7 @@ const processLogFile = async (
     // Continue reading until end of the file reached or if the desired count is reached
     while (end > 0 && !shouldStopReading) {
       // Initialize the start to end - buffer size, so that the last chunk is processed first
-      const start = Math.max(0, end - bufferSize);
+      const start = Math.max(0, (end - bufferSize) + 1);
 
       shouldStopReading = await processStream(
         start,
