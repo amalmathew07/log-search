@@ -1,4 +1,4 @@
-/* style.css */
+
 
 .container {
   border: 1px solid #ddd;
@@ -26,7 +26,6 @@
   border-radius: 4px;
 }
 
-/* Adjusted styles for horizontal alignment */
 .form-row {
   display: flex;
   align-items: center;
@@ -37,7 +36,6 @@
   margin-right: 20px;
 }
 
-/* Added style to reduce width of the Number of Matches input */
 .form-row .form-group.number-input {
   width: 30%;
 }
@@ -89,19 +87,19 @@
 }
 
 .custom-btn {
-  background-color: #1dbee6; /* Red color */
+  background-color: #1dbee6; 
   border-color: #1dbee6;
-  color: #0c191d; /* Text color */
-  font-size: 18px; /* Increase font size */
-  padding: 10px 20px; /* Adjust padding for a larger button */
+  color: #0c191d; 
+  font-size: 18px; 
+  padding: 10px 20px; 
   display: block;
-  margin: 50px auto; /* Center the button */
+  margin: 50px auto; 
 }
 
 .custom-btn:hover {
-  background-color: #09495e; /* Darker red on hover */
-  border-color: #09495e;
-  color: #aab2b5;
+  background-color: #0056b3; 
+  border-color: #0056b3;
+  color: #e9eeef;
 }
 
 .custom-grp {
@@ -117,7 +115,7 @@
 }
 
 .table-responsive {
-  max-height: 70vh; /* Adjust the percentage as needed */
+  max-height: 70vh; 
   overflow-y: auto;
 }
 
@@ -135,9 +133,9 @@
   }
   
   .pagination button {
-    background-color: #007bff;
-    color: #fff;
-    border: 1px solid #007bff;
+    background-color: #1dbee6;
+    color: #050000;
+    border: 1px solid #1dbee6;
     cursor: pointer;
     margin: 0 5px;
     padding: 5px 10px;
@@ -145,8 +143,9 @@
   }
   
   .pagination button:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    background-color: #cf3535;
+    border-color: #cf3535;
+    color: #f3f3f3;
   }
   
   .pagination button.active {
@@ -194,4 +193,10 @@
     color: #14537d;
     padding-bottom: 100px;
     border-bottom: 1px
+  }
+
+  .pagination .selected-page {
+    background-color: #cf3535;
+    border-color: #cf3535;
+    color: #f3f3f3;
   }

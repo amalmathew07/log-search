@@ -34,3 +34,7 @@ This is the most user friendly and preferred way to test the log search capabili
 1. The backend end point for retrieving log is defined as ```/logs```. Provide ```http://localhost:3000/logs``` in URL section of the postman
 2. Provide proper inputs, pattern and file name required and count can be blank (but cannot be 0 or less than 0).
 3. Click the Send button and the results (or error message) will be displayed in JSON format
+
+## Testing Demos
+UI App Demo - https://monosnap.com/file/QMw2BMF6E1XikClfExOh8YnEsBqmj2
+Postman Test Demo - https://monosnap.com/file/danTMNVUn34xePVvFT6Sr1x3iltPS5

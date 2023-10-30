@@ -134,7 +134,7 @@ const processLines = (pattern, count, lines, matchedLogs) => {
         const json = JSON.parse(line);
         matchedLogs.push(json);
         if (count !== "" && !isNaN(count) && count == matchedLogs.length) {
-          // If pattern and count matches return the flag
+          // If count is reached return the flag
           // to notify no more chunk processing required
           return true;
         }

@@ -66,14 +66,17 @@ const LogSearchUI = () => {
         toast.success("Data found successfully!");
       } else if (data.error && data.code === "FILE_NOT_FOUND") {
         setLogs([]);
+        setCurrentPage(0);
         toast.error(<div>Cannot find file <em><strong>${data.filePath}</strong></em>. Please try again.</div>);
       } else {
         setLogs([]);
+        setCurrentPage(0);
         toast.error("Data not found for the given criteria.");
       }
       setLogs(data);
     } catch (error) {
       setLogs([]);
+      setCurrentPage(0);
       toast.error("Error fetching data. Please try again.");
     } finally {
       setCurrentPattern(pattern);
@@ -220,6 +223,7 @@ const LogSearchUI = () => {
             key={pageNumber}
             onClick={() => handlePageChange(pageNumber)}
             variant={pageNumber === currentPage ? "primary" : "secondary"}
+            className={pageNumber === currentPage ? "selected-page" : ""}
           >
             {pageNumber + 1}
           </Button>
